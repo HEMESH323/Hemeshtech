@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRICKET SCOREBOARD</title>
+  <link rel="icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTuASP0ElYezTRzdcf6jvEZODDvjcaXLQ5sFg&usqp=CAU">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-image: url('https://t4.ftcdn.net/jpg/06/80/00/45/240_F_680004564_JTmKsYB9fsDP4t2JodrlwnCpmHHm4ZEj.jpg');
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+    .container {
+      background-color: rgba(255, 255, 255, 0.85);
+      padding: 2rem;
+      border-radius: 1rem;
+      max-width: 800px;
+      width: 100%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+    header img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin: 0.5rem 0;
+    }
+    .button-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.75rem;
+      margin: 2rem 0;
+    }
+    .button-container button {
+      flex: 0 0 calc(25% - 1rem);
+      min-width: 60px;
+      font-weight: bold;
+      font-size: 1rem;
+      padding: 0.5rem;
+      border-radius: 8px;
+    }
+    #display, #score {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      font-weight: bold;
+      background-color: #f5f5f5;
+      padding: 1rem;
+      border-radius: 10px;
+      min-height: 3rem;
+      word-wrap: break-word;
+    }
+    hr {
+      border-top: 2px solid #000;
+      margin: 1.5rem 0;
+    }
+    @media (max-width: 576px) {
+      .button-container button {
+        flex: 0 0 calc(33.33% - 0.5rem);
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTWY6r-h0b2QNcWTRshooNf8jBg492n19LNIQ&usqp=CAU" alt="Logo">
+      <h1><u>CRICKET SCOREBOARD</u></h1>
+    </header>
+
+    <div id="score"></div>
+
+    <div class="button-container" id="buttons"></div>
+
+    <div id="display"></div>
+  </div>
+
+  <script>
+    let scores = 0, wicket = 0, overs = 0, ball = 0, runs = 0, wic = 0, clicks = 0;
+    let currentdisplay = `Over ${overs + 1} --   `;
+    let current = "";
+    let history = [];
+
+    const scoreBoard = document.getElementById('score');
+    const display = document.getElementById('display');
+    const buttons = document.getElementById('buttons');
+
+    const updateDisplay = () => {
+      display.innerHTML = `${currentdisplay}`;
+      scoreBoard.innerHTML = `TEAM - ${scores} / ${wicket} in ${overs}.${ball} overs<br><h3>RUN RATE : ${(scores / clicks * 6).toFixed(2)}</h3>`;
+    };
+
+    const completeOver = () => {
+      overs++;
+      currentdisplay += ` -- ${runs}/${wic}<br><br>Over ${overs + 1} - `;
+      ball = 0; runs = 0; wic = 0;
+      alert('OVER COMPLETED');
+    };
+
+    const registerBall = (score, isWicket, extraType) => {
+      history.push({ scores, wicket, overs, ball, runs, wic, clicks, currentdisplay });
+
+      clicks++;
+      if (!extraType) ball++;
+
+      if (isWicket) {
+        wicket++; wic++;
+        if (wicket >= 10) {
+          alert(`INNINGS COMPLETED AND TARGET IS ${scores + 1} RUNS TO WIN`);
+        }
+      }
+
+      scores += score;
+      runs += score;
+      currentdisplay += `${extraType ? extraType + '+' + score : score}${isWicket ? '+w' : ''} `;
+
+      if (ball === 6) completeOver();
+      updateDisplay();
+    };
+
+    const undoLast = () => {
+      const last = history.pop();
+      if (last) {
+        ({ scores, wicket, overs, ball, runs, wic, clicks, currentdisplay } = last);
+        updateDisplay();
+      } else {
+        alert("No more actions to undo.");
+      }
+    };
+
+    const actions = [
+      ['0', () => registerBall(0, false)],
+      ['1', () => registerBall(1, false)],
+      ['2', () => registerBall(2, false)],
+      ['3', () => registerBall(3, false)],
+      ['4', () => registerBall(4, false)],
+      ['6', () => registerBall(6, false)],
+      ['W', () => registerBall(0, true)],
+      ['1+W', () => registerBall(1, true)],
+      ['2+W', () => registerBall(2, true)],
+      ['Nb+1', () => registerBall(1, false, 'Nb')],
+      ['Nb+2', () => registerBall(2, false, 'Nb')],
+      ['Nb+3', () => registerBall(3, false, 'Nb')],
+      ['Nb+4', () => registerBall(4, false, 'Nb')],
+      ['Nb+6', () => registerBall(6, false, 'Nb')],
+      ['Nb+W', () => registerBall(0, true, 'Nb')],
+      ['Undo', undoLast],
+    ];
+
+    actions.forEach(([label, handler]) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-outline-primary';
+      btn.textContent = label;
+      btn.onclick = handler;
+      buttons.appendChild(btn);
+    });
+
+    display.innerHTML = currentdisplay;
+    scoreBoard.innerHTML = `TEAM - ${scores} / ${wicket} in ${overs}.${ball} overs`;
+  </script>
+</body>
+</html>
